@@ -1,0 +1,12 @@
+box: dax/java7-oracle-debian@0.0.1
+build:
+  steps:
+    - script:
+        name: cleanup
+        code: ./sbt clean
+    - script:
+        name: tests
+        code: ./sbt test
+    - script:
+        name: create Debian package
+        code: ./sbt debian:packageBin
