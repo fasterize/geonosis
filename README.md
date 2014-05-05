@@ -1,10 +1,10 @@
 # Geonosis #
 
-Geonosis is a [Zookeeper](http://zookeeper.apache.org/) client daemon that synchronize Zookeeper nodes to its local file system.
+Geonosis is a [Zookeeper](http://zookeeper.apache.org/) client daemon that synchronizes Zookeeper nodes with a local file system. It uses [Curator](http://curator.apache.org/) to access Zookeeper and is coded in Scala.
 
-Zookeeper is widely used and well tested system in the Java world but as soon as you leave the JVM, you have to rely on a module of your language binded to the Zookeeper C driver. A combination that might be far from being stable enough in all situations.
+Zookeeper is a widely used and well tested system in the Java world but as soon as you leave the JVM, you have to rely on a module of your language binded to the Zookeeper C driver. A combination that might be far from being stable enough in all situations.
 
-Geonosis is here to replace any (non Java) read only system that could benefit of data kept in Zookeeper.
+Geonosis is here to replace any (non Java) read-only system that could benefit of data kept in Zookeeper.
 
 ## Usage ##
 
@@ -28,7 +28,7 @@ syncdir = "/tmp/zookeeper"
 port = 9000
 ```
 
-With this configuration file, Geonosis will connect to a Zookeeper server on `localhost:2181` and keep track of all children Zookeeper nodes under Zookeeper node `/test`. Files will be created on the local file system under `/tmp/zookeeper`.
+With this configuration file, Geonosis will connect to a Zookeeper server on `localhost:2181` and keep track of all children nodes under node `/test`. Files will be created on the local file system under `/tmp/zookeeper`.
 
 For example, with the following Zookeeper nodes hierarchy:
 ```
