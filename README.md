@@ -11,6 +11,10 @@ Geonosis is here to replace any (non Java) read-only system that could benefit o
 ```
 ./sbt run
 ```
+or
+```
+./sbt run [-Dconfig.file=/path_to/application.conf]
+```
 
 Default parameters are located in [src/main/resources/application.conf](https://github.com/fasterize/geonosis/blob/master/src/main/resources/application.conf)
 

@@ -96,15 +96,15 @@ class ZookeeperSync(val zookeeperServers: String, val zkNodes: Seq[String], val 
         def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
           event.getType match {
             case PathChildrenCacheEvent.Type.CHILD_ADDED => {
-              debug("Node added: ${event.getData.getPath}")
+              debug(s"Node added: ${event.getData.getPath}")
               dump(getChildFilesToDump(event.getData))
             }
             case PathChildrenCacheEvent.Type.CHILD_UPDATED => {
-              debug("Node changed: ${event.getData.getPath}")
+              debug(s"Node changed: ${event.getData.getPath}")
               dump(getChildFilesToDump(event.getData))
             }
             case PathChildrenCacheEvent.Type.CHILD_REMOVED => {
-              debug("Node removed: ${event.getData.getPath}")
+              debug(s"Node removed: ${event.getData.getPath}")
               remove(event.getData.getPath)
             }
             case _ =>
