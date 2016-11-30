@@ -18,7 +18,7 @@ object GeonosisBuild extends Build {
         "org.scalatra" %% "scalatra-json" % ScalatraVersion,
         "org.json4s"   %% "json4s-jackson" % "3.2.6",
 
-        "org.clapper" %% "grizzled-slf4j" % "0.6.10",
+        "org.clapper" %% "grizzled-slf4j" % "1.0.1",
 
         "org.apache.curator" % "curator-recipes" % "2.4.1",
 

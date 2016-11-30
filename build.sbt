@@ -1,11 +1,9 @@
-import NativePackagerKeys._
 import com.typesafe.sbt.packager.archetypes.ServerLoader
+import com.typesafe.sbt.packager.archetypes.TemplateWriter
 
 name := "geonosis"
 
 version := "0.1"
-
-packageArchetype.java_server
 
 serverLoading in Debian := ServerLoader.SystemV
 
@@ -28,4 +26,6 @@ mappings in Universal <+= (packageBin in Compile, sourceDirectory ) map { (_, sr
   conf -> "conf/application.conf"
 }
 
-seq(lsSettings :_*)
+Seq(lsSettings :_*)
+
+enablePlugins(JavaServerAppPackaging)
