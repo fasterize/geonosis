@@ -1,2 +1,1 @@
--mem 256
--Dconfig.file=${{chdir}}/conf/application.conf
+RUN_OPTS="-Dconfig.file=${{chdir}}/conf/application.conf"
