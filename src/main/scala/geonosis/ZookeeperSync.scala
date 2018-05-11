@@ -1,5 +1,7 @@
 package geonosis
 
+import java.io.File
+
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -43,8 +45,10 @@ class ZookeeperSync(val zookeeperServers: String, val zkNodes: Seq[String], val 
 
   def dump(actions: Map[Path, Array[Byte]]): Unit = {
     actions.foreach { case (path, data) =>
-      debug(s"Writing $path")
-      path.write(data)
+      val tempPath: Path = File.createTempFile("geonosis", "tmp")
+      debug(s"Writing $path to $tempPath")
+      tempPath.write(data)
+      tempPath.moveTo(path, true, true)
     }
   }
 
