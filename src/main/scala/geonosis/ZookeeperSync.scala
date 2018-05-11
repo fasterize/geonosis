@@ -15,7 +15,7 @@ import grizzled.slf4j.Logging
 import scalax.file.Path
 import scalax.file.ImplicitConversions._
 
-class ZookeeperSync(val zookeeperServers: String, val zkNodes: Seq[String], val dumpBasename: String) extends Logging {
+class ZookeeperSync(val zookeeperServers: String, val zkNodes: Seq[String], val dumpBasename: String, val shouldBeJSON: Boolean = false) extends Logging {
   val client: CuratorFramework = CuratorFrameworkFactory.newClient(zookeeperServers,
       new ExponentialBackoffRetry(1000, 3))
   val dumpBasePath = Path.fromString(dumpBasename)
@@ -55,16 +55,31 @@ class ZookeeperSync(val zookeeperServers: String, val zkNodes: Seq[String], val 
   }
 
   def getChildFilesToDump(child: ChildData): Map[Path, Array[Byte]] = {
-    List(
-      getChildData(child),
-      getChildMetadata(child)
-    ).flatten.toMap
+    try {
+      List(
+        getChildData(child),
+        getChildMetadata(child)
+      ).flatten.toMap
+    } catch {
+      case _: com.fasterxml.jackson.core.JsonParseException => {
+        error(s"Failed to validate JSON from ${child.getPath}")
+        Map()
+      }
+      case _: com.fasterxml.jackson.databind.JsonMappingException => {
+        error(s"Failed to validate JSON from ${child.getPath}")
+        Map()
+      }
+    }
   }
 
   def getChildData(child: ChildData): Option[(Path, Array[Byte])] = {
     if (child.getData == null) {
       None
     } else {
+      if (shouldBeJSON) {
+        debug(s"Validating data from ${child.getPath} as JSON")
+        parse(new String(child.getData))
+      }
       val childPath = Path.fromString(child.getPath.substring(1))
       Some((dumpBasePath / childPath / "__data__") -> child.getData)
     }
@@ -147,9 +162,9 @@ class ZookeeperSync(val zookeeperServers: String, val zkNodes: Seq[String], val 
 object ZookeeperSync {
   var sync: ZookeeperSync = null
 
-  def apply(zookeeperServers: String = "localhost:2181", zkNodes: Seq[String] = Seq(), dumpBasename: String = "/tmp"): ZookeeperSync = {
+  def apply(zookeeperServers: String = "localhost:2181", zkNodes: Seq[String] = Seq(), dumpBasename: String = "/tmp", shouldBeJSON: Boolean = false): ZookeeperSync = {
     if (sync == null) {
-      sync = new ZookeeperSync(zookeeperServers, zkNodes, dumpBasename)
+      sync = new ZookeeperSync(zookeeperServers, zkNodes, dumpBasename, shouldBeJSON)
       sync.start
     }
     sync

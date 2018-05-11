@@ -94,8 +94,71 @@ class ZookeeperSyncSpec extends ScalatraSuite with FunSpec with BeforeAndAfter w
 
       zookeeperSync.getCacheData(cache) should equal(Map())
     }
-
   }
+
+  describe("a ZookeeperSync with JSON validation") {
+    val zookeeperSync = new ZookeeperSync("localhost:2181", Seq("/test1", "/test2"), "/tmp/test", true)
+
+    it("should dump a filled Zookeeper cache with valid JSON") {
+      val cache = mock[PathChildrenCacheWithDC]
+      when(cache.getCurrentData).thenReturn(
+        Seq(new ChildDataWithC("/test1/test11",
+                               new Stat(111, 112, 113, 114, 11, 12, 13, 115, 8, 0, 116),
+                               """{"test": 1}""".getBytes)
+        ).map(_.asInstanceOf[ChildData]).asJava)
+
+      zookeeperSync.getCacheData(cache).
+        mapValues {new String(_)} should equal(
+          Map(
+            Path.fromString("/tmp/test/test1/test11/__data__") -> """{"test": 1}""",
+            Path.fromString("/tmp/test/test1/test11/__metadata__") -> compact(render(
+              ("dataVersion" -> 11) ~
+                ("cversion" -> 12) ~
+                ("cZxid" -> 111) ~
+                ("ctime" -> 113) ~
+                ("mZxid" -> 112) ~
+                ("mtime" -> 114) ~
+                ("pZxid" -> 116) ~
+                ("aclVersion" -> 13) ~
+                ("ephemeralOwner" -> 115) ~
+                ("dataLength" -> 8) ~
+                ("numChildren" -> 0)
+            ))
+          ))
+    }
+
+    it("should dump a filled Zookeeper cache with invalid JSON") {
+      val cache = mock[PathChildrenCacheWithDC]
+      when(cache.getCurrentData).thenReturn(
+        Seq(new ChildDataWithC("/test1/test11",
+                               new Stat(111, 112, 113, 114, 11, 12, 13, 115, 8, 0, 116),
+                               """{"test": 1}""".getBytes),
+            new ChildDataWithC("/test1/test12",
+                               new Stat(211, 212, 213, 214, 21, 22, 23, 215, 8, 0, 216),
+                               """{"test": invalid}""".getBytes)
+        ).map(_.asInstanceOf[ChildData]).asJava)
+
+      zookeeperSync.getCacheData(cache).
+        mapValues {new String(_)} should equal(
+          Map(
+            Path.fromString("/tmp/test/test1/test11/__data__") -> """{"test": 1}""",
+            Path.fromString("/tmp/test/test1/test11/__metadata__") -> compact(render(
+              ("dataVersion" -> 11) ~
+                ("cversion" -> 12) ~
+                ("cZxid" -> 111) ~
+                ("ctime" -> 113) ~
+                ("mZxid" -> 112) ~
+                ("mtime" -> 114) ~
+                ("pZxid" -> 116) ~
+                ("aclVersion" -> 13) ~
+                ("ephemeralOwner" -> 115) ~
+                ("dataLength" -> 8) ~
+                ("numChildren" -> 0)
+            ))
+          ))
+    }
+  }
+
 
   describe("a ZookeeperSync with a temporary dump directory") {
     var zookeeperSync: ZookeeperSync = new ZookeeperSync("localhost:2181",
@@ -239,7 +302,7 @@ class ZookeeperSyncSpec extends ScalatraSuite with FunSpec with BeforeAndAfter w
           "test1/test11/__data__",
           "test1/test11/__metadata__"
         ))
-      
+
       when(cache.getListenable).thenReturn(listenerContainer)
       val listener = zookeeperSync.addListener(cache)
 
@@ -289,7 +352,7 @@ class ZookeeperSyncSpec extends ScalatraSuite with FunSpec with BeforeAndAfter w
           "test1/test11/__data__",
           "test1/test11/__metadata__"
         ))
-      
+
       when(cache.getListenable).thenReturn(listenerContainer)
       val listener = zookeeperSync.addListener(cache)
 
@@ -302,7 +365,7 @@ class ZookeeperSyncSpec extends ScalatraSuite with FunSpec with BeforeAndAfter w
 
       listDir(tempdir) should equal (List())
     }
-    
+
   }
 
   def listDir(dir: Path): Seq[String] = {

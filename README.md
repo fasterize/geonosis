@@ -30,6 +30,7 @@ zookeeper {
 }
 syncdir = "/tmp/zookeeper"
 port = 9000
+validate_json = false
 ```
 
 With this configuration file, Geonosis will connect to a Zookeeper server on `localhost:2181` and keep track of all children nodes under node `/test`. Files will be created on the local file system under `/tmp/zookeeper`.

@@ -10,7 +10,8 @@ class ScalatraBootstrap extends LifeCycle {
 
     ZookeeperSync(config.getStringList("zookeeper.servers").asScala.toSeq.mkString(","),
                   config.getStringList("zookeeper.paths").asScala.toSeq,
-                  config.getString("syncdir"))
+                  config.getString("syncdir"),
+                  config.getBoolean("validate_json"))
 
     context.mount(new GeonosisServlet, "/*")
   }
