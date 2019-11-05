@@ -8,6 +8,7 @@ import scala.util.Try
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildrenCacheListener, PathChildrenCacheEvent, ChildData}
+import org.apache.curator.CuratorConnectionLossException
 import org.apache.curator.utils.{CloseableUtils, ZKPaths}
 
 import org.json4s._
@@ -40,6 +41,10 @@ class ZookeeperSync(val zookeeperServers: String, val zkNodes: Seq[String], val 
         addListener(cache)
         dump(getCacheData(cache))
       }
+    } catch {
+      case zkerror: CuratorConnectionLossException => System.exit(123)
+      case neterror: java.net.NoRouteToHostException => System.exit(124)
+      case t: Throwable => throw t
     }
   }
 
